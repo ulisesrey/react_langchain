@@ -54,10 +54,10 @@ if __name__ == "__main__":
     
     llm = ChatOllama(model="mistral", temperature=0.0, stop=["\nObservation"])
 
-    chain = prompt | llm
+    agent = prompt | llm
 
     sample_text = "What is the length of the text 'skjdhfsdfhjksdfjkhldsfjklhñ!'?"
-    response = chain.invoke({"input": sample_text})
+    response = agent.invoke({"input": sample_text})
     print(response)
 
     # print(f"The length of the text is: {length}")
