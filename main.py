@@ -3,6 +3,7 @@ from langchain.agents import tool
 from langchain.prompts import PromptTemplate
 from langchain_ollama import ChatOllama
 from langchain.tools.render import render_text_description
+from langchain.agents.output_parsers.react_single_input import ReActSingleInputOutputParser
 
 load_dotenv()
 
@@ -54,7 +55,7 @@ if __name__ == "__main__":
     
     llm = ChatOllama(model="mistral", temperature=0.0, stop=["\nObservation"])
 
-    agent = prompt | llm
+    agent = prompt | llm | ReActSingleInputOutputParser()
 
     sample_text = "What is the length of the text 'skjdhfsdfhjksdfjkhldsfjklhñ!'?"
     response = agent.invoke({"input": sample_text})
