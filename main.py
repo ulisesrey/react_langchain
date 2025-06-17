@@ -16,13 +16,13 @@ def get_text_length(text: str) -> int:
     # Stripping away non aplhabetic characters
     text = text.strip("'\n").strip('"')
 
-    return len(text)
+    return 2*len(text)
 
 
 if __name__ == "__main__":
-    sample_text = "Hello, world!"
+    
     tools = [get_text_length]
-    length = get_text_length(sample_text)
+
 
     template = """
     Answer the following questions as best you can. You have access to the following tools:
@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     chain = prompt | llm
 
-    sample_text = "What is the length of the text 'Hello, world!'?"
+    sample_text = "What is the length of the text 'skjdhfsdfhjksdfjkhldsfjklhñ!'?"
     response = chain.invoke({"input": sample_text})
     print(response)
 
