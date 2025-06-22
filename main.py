@@ -64,46 +64,45 @@ if __name__ == "__main__":
     tools_description = render_text_description(tools)
     
     prompt = PromptTemplate.from_template(template=template).partial(
-        tools=tools, tool_names=tool_names)
+        tools=tools_description, tool_names=tool_names)
     
-    llm = ChatOllama(model="deepseek-r1:8b", temperature=0.0, stop=["\nObservation"])
+    llm = ChatOllama(model="deepseek-r1:8b", temperature=0.0, stop=["\nObservation", "Observation"])
+    
     intermediate_steps = []
 
     agent = ({
         "input": lambda x: x["input"],
-        "agent_scratchpad": lambda x: format_log_to_str(x["agent_scratchpad"])} | prompt | llm | ReActSingleInputOutputParser() )
+        "agent_scratchpad": lambda x: format_log_to_str(x["agent_scratchpad"])}
+        | prompt | llm | ReActSingleInputOutputParser()
+        )
 
     sample_text = "What is the length in characters of the text 'kajs sadjkj ssdsdsalkjkl j'?"
     
-    # agent_step might be either: An action the agent wants to take, or A finished answer.
-    agent_step: Union[AgentAction, AgentFinish] = agent.invoke({"input": sample_text,
+    # Define agent_step
+    agent_step = "" # AgentAction()
+
+    while not isinstance(agent_step, AgentFinish):
+        agent_step: Union[AgentAction, AgentFinish] = agent.invoke({"input": sample_text,
                                                                 "agent_scratchpad": intermediate_steps})
-    print(agent_step)
-
-
-    # response = agent.invoke({"input": sample_text})
-    # print("Response from agent:")
-    # print(response)
-    
-
-    if isinstance(agent_step, AgentAction):
+        
+        # agent_step might be either: An action the agent wants to take, or A finished answer.
+        print(agent_step)
         print(f"\n\n\n agent_step is instance AgentAction\n\n\n")
         # This part does not work, should only get the name of the func, to be used later
-        tool_name = agent_step.tool
         
-        print(f"Tool name is: {tool_name}")
-        tool_to_use = find_tool_by_name(tools, tool_name)
-        tool_input = agent_step.tool_input
+        
+        if isinstance(agent_step, AgentAction):
+            tool_name = agent_step.tool
+            print(f"Tool name is: {tool_name}")
+            tool_to_use = find_tool_by_name(tools, tool_name)
+            tool_input = agent_step.tool_input
 
-        observation = tool_to_use.func(str(tool_input))
-        
-        print(f"Observation {observation}")
-        intermediate_steps.append((agent_step, str(observation)))
+            observation = tool_to_use.func(str(tool_input))
+            
+            print(f"\n\nObservation {observation}")
+            intermediate_steps.append((agent_step, str(observation)))
     
     # agent_step might be either: An action the agent wants to take, or A finished answer.
-    agent_step: Union[AgentAction, AgentFinish] = agent.invoke({"input": sample_text,
-                                                                "agent_scratchpad": intermediate_steps})
-    print(agent_step)
-
+    
     if isinstance(agent_step, AgentFinish):
         print(agent_step.return_values)
